@@ -9,15 +9,11 @@ train_set <- read.csv("human_activity/train.csv", header=TRUE)
 test_set <- read.csv("human_activity/test.csv", header=TRUE)
 
 # classic classification using rpart
-tree <- rpart(Activity ~ ., method="class", data=train_set)
+#tree <- rpart(Activity ~ ., method="class", data=train_set)
 
 # convert labels
-train_set$Activity <- mapvalues(train_set$Activity,
-	from = c("SITTING", "STANDING", "LAYING", "WALKING", "WALKING_DOWNSTAIRS", "WALKING_UPSTAIRS"),
-	to = c("000", "001", "010", "011", "100", "101"))
-test_set$Activity <- mapvalues(test_set$Activity,
-	from = c("SITTING", "STANDING", "LAYING", "WALKING", "WALKING_DOWNSTAIRS", "WALKING_UPSTAIRS"),
-	to = c("000", "001", "010", "011", "100", "101"))
+levels(train_set$Activity) <- c("000", "001", "010", "011", "100", "101", "110", "111")
+levels(test_set$Activity) <- c("000", "001", "010", "011", "100", "101", "110", "111")
 
 train_model <- function(set, bit) {
 	levels(set$Activity) <- substring(levels(set$Activity), bit, bit)
@@ -37,9 +33,15 @@ for (i in 1:classifiers_count) {
 # run separate classifiers
 labels <- vector('character')
 for (i in 1:classifiers_count) {
-	labels <- append(labels, predict_one_bit(classifiers[[i]], test_set))
+	labels <- append(labels, as.character(predict_one_bit(classifiers[[i]], test_set)))
 }
-labels <- matrix
+
+labels <- matrix(labels, nrow=length(test_set[,1]), ncol=classifiers_count)
+labels <- as.factor(apply(labels, 1, paste, collapse=''))
+
+# calculate accuracy
+confusion_matrix <- table(test_set$Activity, labels)
+accuracy <- sum(diag(confusion_matrix))/sum(confusion_matrix)
 
 code_matrix <- function(nClasses) {
   n <- '^' (2, nClasses - 1) - 1
