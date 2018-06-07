@@ -26,7 +26,7 @@ train_model <- function(set, bit) {
 }
 
 predict_one_bit <- function(classifier, set) {
-	return(predict(classifiers, test_set, type='class'))
+	return(predict(classifier, test_set, type='class'))
 }
 
 # train separate classifiers
@@ -40,3 +40,23 @@ for (i in 1:classifiers_count) {
 	labels <- append(labels, predict_one_bit(classifiers[[i]], test_set))
 }
 labels <- matrix
+
+code_matrix <- function(nClasses) {
+  n <- '^' (2, nClasses - 1) - 1
+  
+  vct <- c()
+  for (i in 1:n-1) {
+    vct <- c(vct, number2binary(i + n, nClasses))
+  }
+  
+  return(matrix(vct, nrow = nClasses, ncol = n))
+}
+
+number2binary = function(number, noBits) {
+  binary_vector = rev(as.numeric(intToBits(number)))
+  if(missing(noBits)) {
+    return(binary_vector)
+  } else {
+    binary_vector[-(1:(length(binary_vector) - noBits))]
+  }
+}
