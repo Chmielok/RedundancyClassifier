@@ -1,5 +1,6 @@
 library(rpart)
 library(plyr)
+library(R.utils)
 
 classifiers_count <- 3
 classifiers <- list()
@@ -45,11 +46,16 @@ code_matrix <- function(nClasses) {
   n <- '^' (2, nClasses - 1) - 1
   
   vct <- c()
-  for (i in 1:n-1) {
+  for (i in 1:n) {
     vct <- c(vct, number2binary(i + n, nClasses))
   }
   
   return(matrix(vct, nrow = nClasses, ncol = n))
+}
+
+bit_codes = function(nClasses) {
+  mtrx = t(code_matrix(nClasses))
+  return(c(split(mtrx, rep(1:ncol(mtrx), each=nrow(mtrx)))))
 }
 
 number2binary = function(number, noBits) {
