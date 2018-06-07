@@ -2,7 +2,7 @@ library(rpart)
 library(plyr)
 
 classifiers_count <- 3
-classifiers <- c()
+classifiers <- list()
 
 # load the data for human activity
 train_set <- read.csv("human_activity/train.csv", header=TRUE)
@@ -25,7 +25,18 @@ train_model <- function(set, bit) {
 	return(rpart(Activity ~ ., data = set))
 }
 
+predict_one_bit <- function(classifier, set) {
+	return(predict(classifiers, test_set, type='class'))
+}
+
 # train separate classifiers
 for (i in 1:classifiers_count) {
-	classifiers[i] <- train_model(train_set, bit = i)
+	classifiers[[i]] <- train_model(train_set, bit = i)
 }
+
+# run separate classifiers
+labels <- vector('character')
+for (i in 1:classifiers_count) {
+	labels <- append(labels, predict_one_bit(classifiers[[i]], test_set))
+}
+labels <- matrix
