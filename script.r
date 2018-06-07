@@ -1,20 +1,26 @@
 library(rpart)
 library(plyr)
 library(R.utils)
+library(e1071)
 
-classifiers_count <- 3
-classifiers <- list()
+source("redundant_coding.R")
 
 # load the data for human activity
 train_set <- read.csv("human_activity/train.csv", header=TRUE)
 test_set <- read.csv("human_activity/test.csv", header=TRUE)
 
+n_classes <- nlevels(train_set$Activity)
+
+classifiers_count <- code_length(n_classes)
+classifiers <- list()
+
 # classic classification using rpart
 #tree <- rpart(Activity ~ ., method="class", data=train_set)
 
 # convert labels
-levels(train_set$Activity) <- c("000", "001", "010", "011", "100", "101", "110", "111")
-levels(test_set$Activity) <- c("000", "001", "010", "011", "100", "101", "110", "111")
+new_classes <- bit_codes(n_classes)
+levels(train_set$Activity) <- new_classes
+levels(test_set$Activity) <- new_classes
 
 train_model <- function(set, bit) {
 	levels(set$Activity) <- substring(levels(set$Activity), bit, bit)
@@ -38,33 +44,8 @@ for (i in 1:classifiers_count) {
 }
 
 labels <- matrix(labels, nrow=length(test_set[,1]), ncol=classifiers_count)
-labels <- as.factor(apply(labels, 1, paste, collapse=''))
+fixed_labels <- as.factor(correct_labels(labels, new_classes))
 
 # calculate accuracy
-confusion_matrix <- table(test_set$Activity, labels)
+confusion_matrix <- table(test_set$Activity, fixed_labels)
 accuracy <- sum(diag(confusion_matrix))/sum(confusion_matrix)
-
-code_matrix <- function(nClasses) {
-  n <- '^' (2, nClasses - 1) - 1
-  
-  vct <- c()
-  for (i in 1:n) {
-    vct <- c(vct, number2binary(i + n, nClasses))
-  }
-  
-  return(matrix(vct, nrow = nClasses, ncol = n))
-}
-
-bit_codes = function(nClasses) {
-  mtrx = t(code_matrix(nClasses))
-  return(c(split(mtrx, rep(1:ncol(mtrx), each=nrow(mtrx)))))
-}
-
-number2binary = function(number, noBits) {
-  binary_vector = rev(as.numeric(intToBits(number)))
-  if(missing(noBits)) {
-    return(binary_vector)
-  } else {
-    binary_vector[-(1:(length(binary_vector) - noBits))]
-  }
-}
