@@ -10,8 +10,10 @@ train_model <- function(formula, classifier, set, bit) {
 	# algorithm specific training
   if(classifier == "rpart") {
 	  return(rpart(formula, data = set))
-  } else if(classifier == "logr") {
+  } else if(classifier == "logit") {
     return(glm(formula, family=binomial(link='logit'), data=set))
+  } else {
+    stop("Unknown classifier")
   }
 }
 
