@@ -6,7 +6,10 @@ train_set$Cover_Type <- as.factor(train_set$Cover_Type)
 source("redundant_predictor.R")
 
 model <- redundant_predictor(Cover_Type ~ ., train_set)
+ordModel <- rpart(Cover_Type ~ ., data = train_set)
 
 results <- predict(model, train_set)
 confusion_matrix <- table(train_set$Cover_Type, results)
 accuracy <- sum(diag(confusion_matrix))/sum(confusion_matrix)
+
+logit_model <- multinom(Cover_Type ~ ., data=train_set, maxit=1000)

@@ -6,14 +6,17 @@ code_matrix <- function(nClasses) {
     vct <- c(vct, number2binary(i + n, nClasses))
   }
   mat = matrix(vct, nrow = nClasses, ncol = n)
-  return(mat[do.call(order, as.data.frame(mat)),])
+  
+  if(nClasses > 6) {
+    mat = choose_random_columns(mat, code_length(6))
+  }
+
+    return(mat[do.call(order, as.data.frame(mat)),])
 }
 
 bit_codes = function(nClasses) {
   mtrx = code_matrix(nClasses)
-  if(nClasses > 6) {
-    mtrx = choose_random_columns(mtrx, code_length(6))
-  }
+
   return(apply(mtrx, 1, paste, collapse=''))
 }
 
@@ -32,11 +35,18 @@ number2binary = function(number, noBits) {
 }
 
 code_length = function(nClasses) {
+  if(nClasses > 6) {
+    return(code_length(6))
+  }
   return(2 ^ (nClasses - 1) - 1)
 }
 
 correct_labels <- function(labels, classes) {
-  indices <- apply(labels, 1, find_closest, code_matrix(length(classes)))
+  newCl = strsplit(classes, '')
+  newCl = unlist(newCl)
+  newCl = matrix(as.numeric(newCl), ncol = length(classes))
+  newCl = t(newCl)
+  indices <- apply(labels, 1, find_closest, newCl)
   return(classes[indices])
 }
 
