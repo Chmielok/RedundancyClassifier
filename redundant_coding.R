@@ -11,7 +11,15 @@ code_matrix <- function(nClasses) {
 
 bit_codes = function(nClasses) {
   mtrx = code_matrix(nClasses)
+  if(nClasses > 6) {
+    mtrx = choose_random_columns(mtrx, code_length(6))
+  }
   return(apply(mtrx, 1, paste, collapse=''))
+}
+
+choose_random_columns <- function(mat, size) {
+  j <- sample(seq_len(ncol(mat)), size=size)
+  return(mat[, j, drop=FALSE])
 }
 
 number2binary = function(number, noBits) {
