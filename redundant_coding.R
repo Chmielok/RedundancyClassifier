@@ -16,7 +16,6 @@ code_matrix <- function(nClasses) {
 
 bit_codes = function(nClasses) {
   mtrx = code_matrix(nClasses)
-
   return(apply(mtrx, 1, paste, collapse=''))
 }
 
@@ -42,11 +41,10 @@ code_length = function(nClasses) {
 }
 
 correct_labels <- function(labels, classes) {
-  newCl = strsplit(classes, '')
-  newCl = unlist(newCl)
-  newCl = matrix(as.numeric(newCl), ncol = length(classes))
-  newCl = t(newCl)
-  indices <- apply(labels, 1, find_closest, newCl)
+  classes_matrix <- unlist(strsplit(classes, ''))
+  classes_matrix <- matrix(as.numeric(classes_matrix), ncol=length(classes))
+  classes_matrix <- t(classes_matrix)
+  indices <- apply(labels, 1, find_closest, classes_matrix)
   return(classes[indices])
 }
 
